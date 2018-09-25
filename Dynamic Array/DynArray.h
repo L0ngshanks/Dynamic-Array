@@ -6,7 +6,7 @@ template<class T>
 class DynArray
 {
 private:
-	Type * array;
+	T * array;
 	unsigned int Size, Capacity;
 
 public:
@@ -16,7 +16,9 @@ public:
 	/////////////////////////////////////////////////////////////////////////////
 	DynArray()
 	{
-		array = new array[0] = { nulptr };
+		array = nullptr;
+		Size = 0;
+		Capacity = 0;
 	}
 	/////////////////////////////////////////////////////////////////////////////
 	// Function :	Destructor
@@ -24,36 +26,39 @@ public:
 	/////////////////////////////////////////////////////////////////////////////
 	~DynArray()
 	{
-		delete array;
+		delete[] array;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Function :	Copy Constructor
 	/////////////////////////////////////////////////////////////////////////////
-	DynArray(const DynArray<Type>& that)
+	DynArray(const DynArray<T>& that)
 	{
-		if (this != that)
+		Size = that.Size;
+		Capacity = that.capacity();
+		array = new T[Capacity];
+
+		for (unsigned int i = 0; i < size(); ++i)
 		{
-			for (int 1 = 0; i < array.size(); ++i)
-			{
-				array[i] = that->array[i];
-			}
+			array[i] = that[i];
 		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Function :	Assignment Operator
 	/////////////////////////////////////////////////////////////////////////////
-	DynArray<Type>& operator=(const DynArray<Type>& that)
+	DynArray<T>& operator=(const DynArray<T>& that)
 	{
-		if (this != that)
+		Size = that.Size;
+		Capacity = that.capacity();
+		delete[] array;
+		array = new T[Capacity];
+
+		for (unsigned int i = 0; i < size(); ++i)
 		{
-			for (int 1 = 0; i < array.size(); ++i)
-			{
-				array[i] = that->array[i];
-			}
+			array[i] = that[i];
 		}
-		return this;
+		return *this;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -63,11 +68,10 @@ public:
 	// Notes : performs no error checking. user should ensure index is 
 	//		valid with the size() method
 	/////////////////////////////////////////////////////////////////////////////
-	Type& operator[](const unsigned int index)
+	T& operator[](const unsigned int index)
 	{
 		return array[index];
 	}
-
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Function : operator[]
@@ -76,7 +80,7 @@ public:
 	// Notes : performs no error checking. user should ensure index is 
 	//		valid with the size() method
 	/////////////////////////////////////////////////////////////////////////////
-	const Type& operator[](const unsigned int index) const
+	const T& operator[](const unsigned int index) const
 	{
 		return array[index];
 	}
@@ -87,10 +91,7 @@ public:
 	/////////////////////////////////////////////////////////////////////////////
 	unsigned int size() const
 	{
-		int j = 0;
-		for (int i = 0; i < array.size(); ++i)
-			j++;
-		return j;
+		return Size;
 	}
 	/////////////////////////////////////////////////////////////////////////////
 	// Function : capacity
@@ -101,13 +102,7 @@ public:
 	/////////////////////////////////////////////////////////////////////////////
 	unsigned int capacity() const
 	{
-		int j = 0;
-		for (int i = 0; i < array.size(); ++i)
-		{
-			if(array[i] != nullptr)
-				j++;
-		}
-		return j;
+		return Capacity;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -116,8 +111,8 @@ public:
 	/////////////////////////////////////////////////////////////////////////////
 	void clear()
 	{
-		for (int i = 0; i < array.size(); ++i)
-			delete array[i];
+		delete[] array;
+		array = nullptr;
 		Size = 0;
 		Capacity = 0;
 	}
@@ -129,26 +124,16 @@ public:
 	//		no room exists, the array's capacity will be doubled and then 
 	//		the item will be added
 	/////////////////////////////////////////////////////////////////////////////
-	void append(const Type& item)
+	void append(const T& item)
 	{
-		Size = array.size();
-
-		if (Capacity() == 0)
+		if (size() == capacity())
 		{
-			if (Size == 1)
-				array = new array[Size + 1] = { nullptr };
-			else if (Size > 1)
-				array = new array[Size * 2] = { nullptr };
+			reserve();
 		}
 		else
 		{
-			for (int i = 0; i < array.size(); ++i)
-			{
-				if (array[i] == nullptr)
-				{
-					array[i] = item;
-				}
-			}
+			array[Size] = item;
+			Size++;
 		}
 	}
 
@@ -163,46 +148,64 @@ public:
 	/////////////////////////////////////////////////////////////////////////////
 	void reserve(const unsigned int & newCap = 0)
 	{
-		Size = array.size();
-		if (newCap !< Capacity())
+		if (newCap == 0)
 		{
-			if (Size == 1)
-				array = new array[Size + 1] = { nullptr };
-			else if (Size > 1)
-				array = new array[Size * 2] = { nullptr };
+			if (capacity() == 0)
+			{
+				Capacity += 1;
+
+			}
+			else
+			{
+				Capacity *= 2;
+			}
+			if (newCap > capacity())
+			{
+				Capacity = newCap;
+			}
+
+			T *temp = new T[Capacity];
+
+			for (unsigned int i = 0; i < size(); ++i)
+			{
+				temp[i] = array[i];
+			}
+			delete[] array;
+
+			array = temp;
 		}
 	}
-		/////////////////////////////////////////////////////////////////////////////
-		// Function :	insert
-		// Parameters : val - the value to insert
-		//		   index - the index to insert at
-		// Notes : if the array is full, this function should expand the array at 
-		//		the default expansion rate (double the capacity, 1 minimum)
-		/////////////////////////////////////////////////////////////////////////////
-		void insert(const Type val, const unsigned int index)
-		/////////////////////////////////////////////////////////////////////////////
-		// Function :	insert
-		// Parameters : val - the items to insert
-		//		   n - the number of items to insert
-		//		   index - the index to insert at
-		// Notes : if the array is full, this function should expand the array at 
-		//		the default expansion rate (double the capacity, 1 minimum) 
-		//		before inserting
-		/////////////////////////////////////////////////////////////////////////////
-		void insert(const Type * val, const unsigned int n, const unsigned int index)
-		/////////////////////////////////////////////////////////////////////////////
-		// Function :	remove
-		// Parameters : index - the index to remove from
-		// Notes : this function removes one item from the specified index
-		/////////////////////////////////////////////////////////////////////////////
-		void remove(const unsigned int index)
+	///////////////////////////////////////////////////////////////////////////////
+	//// Function :	insert
+	//// Parameters : val - the value to insert
+	////		   index - the index to insert at
+	//// Notes : if the array is full, this function should expand the array at 
+	////		the default expansion rate (double the capacity, 1 minimum)
+	///////////////////////////////////////////////////////////////////////////////
+	//void insert(const T val, const unsigned int index)
+	///////////////////////////////////////////////////////////////////////////////
+	//// Function :	insert
+	//// Parameters : val - the items to insert
+	////		   n - the number of items to insert
+	////		   index - the index to insert at
+	//// Notes : if the array is full, this function should expand the array at 
+	////		the default expansion rate (double the capacity, 1 minimum) 
+	////		before inserting
+	///////////////////////////////////////////////////////////////////////////////
+	//void insert(const T * val, const unsigned int n, const unsigned int index)
+	///////////////////////////////////////////////////////////////////////////////
+	//// Function :	remove
+	//// Parameters : index - the index to remove from
+	//// Notes : this function removes one item from the specified index
+	///////////////////////////////////////////////////////////////////////////////
+	//void remove(const unsigned int index)
 
-		/////////////////////////////////////////////////////////////////////////////
-		// Function :	remove
-		// Parameters : index - the index to remove from
-		//		   n - the number of items to remove
-		// Notes : this function removes multiple items from the specified index
-		/////////////////////////////////////////////////////////////////////////////
-		void remove(const unsigned int index, const unsigned int n)
+	///////////////////////////////////////////////////////////////////////////////
+	//// Function :	remove
+	//// Parameters : index - the index to remove from
+	////		   n - the number of items to remove
+	//// Notes : this function removes multiple items from the specified index
+	///////////////////////////////////////////////////////////////////////////////
+	//void remove(const unsigned int index, const unsigned int n)
 };
 
