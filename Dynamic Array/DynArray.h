@@ -205,21 +205,38 @@ public:
 		if (size() == capacity())
 			reserve(n);
 		else
-			array[index] = val;
+			array[index] = *val;
 	}
-	///////////////////////////////////////////////////////////////////////////////
-	//// Function :	remove
-	//// Parameters : index - the index to remove from
-	//// Notes : this function removes one item from the specified index
-	///////////////////////////////////////////////////////////////////////////////
-	//void remove(const unsigned int index)
+	/////////////////////////////////////////////////////////////////////////////
+	// Function :	remove
+	// Parameters : index - the index to remove from
+	// Notes : this function removes one item from the specified index
+	/////////////////////////////////////////////////////////////////////////////
+	void remove(const unsigned int index)
+	{
+		for (unsigned int i = index + 1; i < size(); ++i)
+		{
+			array[i - 1] = array[i];
+		}
+	}
 
-	///////////////////////////////////////////////////////////////////////////////
-	//// Function :	remove
-	//// Parameters : index - the index to remove from
-	////		   n - the number of items to remove
-	//// Notes : this function removes multiple items from the specified index
-	///////////////////////////////////////////////////////////////////////////////
-	//void remove(const unsigned int index, const unsigned int n)
+	/////////////////////////////////////////////////////////////////////////////
+	// Function :	remove
+	// Parameters : index - the index to remove from
+	//		   n - the number of items to remove
+	// Notes : this function removes multiple items from the specified index
+	/////////////////////////////////////////////////////////////////////////////
+	void remove(const unsigned int index, const unsigned int n)
+	{
+		unsigned int counter = 0;
+		while (counter != n)
+		{
+			for (unsigned int i = index + 1; i < size(); ++i)
+			{
+				array[i - 1] = array[i];
+			}
+			counter++;
+		}
+	}
 };
 
