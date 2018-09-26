@@ -49,14 +49,16 @@ public:
 	/////////////////////////////////////////////////////////////////////////////
 	DynArray<T>& operator=(const DynArray<T>& that)
 	{
-		Size = that.Size;
-		Capacity = that.capacity();
-		delete[] array;
-		array = new T[Capacity];
-
-		for (unsigned int i = 0; i < size(); ++i)
+		if (&array != &that.array)
 		{
-			array[i] = that[i];
+			Size = that.Size;
+			Capacity = that.capacity();
+			delete[] array;
+			array = new T[Capacity];
+			for (unsigned int i = 0; i < size(); ++i)
+			{
+				array[i] = that[i];
+			}
 		}
 		return *this;
 	}
@@ -130,11 +132,8 @@ public:
 		{
 			reserve();
 		}
-		else
-		{
-			array[Size] = item;
-			Size++;
-		}
+		array[Size] = item;
+		Size++;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -153,46 +152,61 @@ public:
 			if (capacity() == 0)
 			{
 				Capacity += 1;
-
 			}
 			else
 			{
 				Capacity *= 2;
 			}
-			if (newCap > capacity())
-			{
-				Capacity = newCap;
-			}
-
-			T *temp = new T[Capacity];
-
-			for (unsigned int i = 0; i < size(); ++i)
-			{
-				temp[i] = array[i];
-			}
-			delete[] array;
-
-			array = temp;
 		}
+		else if (newCap > capacity())
+		{
+			Capacity = newCap;
+		}
+		else
+			return;
+
+		T *temp = new T[Capacity];
+
+		for (unsigned int i = 0; i < size(); ++i)
+		{
+			temp[i] = array[i];
+		}
+
+		delete[] array;
+
+		array = temp;
+
 	}
-	///////////////////////////////////////////////////////////////////////////////
-	//// Function :	insert
-	//// Parameters : val - the value to insert
-	////		   index - the index to insert at
-	//// Notes : if the array is full, this function should expand the array at 
-	////		the default expansion rate (double the capacity, 1 minimum)
-	///////////////////////////////////////////////////////////////////////////////
-	//void insert(const T val, const unsigned int index)
-	///////////////////////////////////////////////////////////////////////////////
-	//// Function :	insert
-	//// Parameters : val - the items to insert
-	////		   n - the number of items to insert
-	////		   index - the index to insert at
-	//// Notes : if the array is full, this function should expand the array at 
-	////		the default expansion rate (double the capacity, 1 minimum) 
-	////		before inserting
-	///////////////////////////////////////////////////////////////////////////////
-	//void insert(const T * val, const unsigned int n, const unsigned int index)
+	/////////////////////////////////////////////////////////////////////////////
+	// Function :	insert
+	// Parameters : val - the value to insert
+	//		   index - the index to insert at
+	// Notes : if the array is full, this function should expand the array at 
+	//		the default expansion rate (double the capacity, 1 minimum)
+	/////////////////////////////////////////////////////////////////////////////
+	void insert(const T val, const unsigned int index)
+	{
+		if (size() == capacity())
+			reserve();
+		else
+			array[index] = val;
+	}
+	/////////////////////////////////////////////////////////////////////////////
+	// Function :	insert
+	// Parameters : val - the items to insert
+	//		   n - the number of items to insert
+	//		   index - the index to insert at
+	// Notes : if the array is full, this function should expand the array at 
+	//		the default expansion rate (double the capacity, 1 minimum) 
+	//		before inserting
+	/////////////////////////////////////////////////////////////////////////////
+	void insert(const T * val, const unsigned int n, const unsigned int index)
+	{
+		if (size() == capacity())
+			reserve(n);
+		else
+			array[index] = val;
+	}
 	///////////////////////////////////////////////////////////////////////////////
 	//// Function :	remove
 	//// Parameters : index - the index to remove from
