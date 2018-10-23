@@ -132,8 +132,7 @@ public:
 		{
 			reserve();
 		}
-		array[Size] = item;
-		Size++;
+		array[Size++] = item;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -186,10 +185,18 @@ public:
 	/////////////////////////////////////////////////////////////////////////////
 	void insert(const T val, const unsigned int index)
 	{
-		if (size() == capacity())
+		/*if (index >= Size && index > 0)
+			return;
+
+		if (Size >= Capacity)
 			reserve();
-		else
-			array[index] = val;
+
+		for (int i = Size - 1; i >= (int)index; --i)
+			array[i + 1] = array[i];
+
+		array[index] = val;
+		++Size;*/
+		insert(&val, 1, index);
 	}
 	/////////////////////////////////////////////////////////////////////////////
 	// Function :	insert
@@ -202,10 +209,16 @@ public:
 	/////////////////////////////////////////////////////////////////////////////
 	void insert(const T * val, const unsigned int n, const unsigned int index)
 	{
-		if (size() == capacity())
-			reserve(n);
-		else
-			array[index] = *val;
+		if (index >= Size && index > 0)
+			return;
+		if (Size + n > Capacity)
+			reserve();
+
+		for (int i = Size - 1; i >= (int)index; --i)
+			array[i + n] = array[i];
+		for (int i = 0; i < n; ++i)
+			array[i + index] = *val;
+		++Size;
 	}
 	/////////////////////////////////////////////////////////////////////////////
 	// Function :	remove
@@ -218,6 +231,7 @@ public:
 		{
 			array[i - 1] = array[i];
 		}
+		Capacity++;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -235,7 +249,7 @@ public:
 			{
 				array[i - 1] = array[i];
 			}
-			counter++;
+			Capacity++;
 		}
 	}
 };
